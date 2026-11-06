@@ -9,7 +9,7 @@
 <!--
   Trang phiếu góp ý riêng cho tester CR Village (không nằm trong game).
   Phát hành: node tools/phat-hanh/phieu.js cr-village  (đẩy lên kho ở games/cr-village/game.json, mục feedback).
-  Địa chỉ cổng nhận phiếu (Google Apps Script) được điền vào chỗ https://script.google.com/macros/s/AKfycbw3AoyGDUztOtxNm70YKPr6knF4yxpeA2XFi2Nv9m8GZWIUn-eXQpCoW0hPoaz0Pu1n_Q/exec lúc phát hành.
+  Địa chỉ cổng nhận phiếu (Google Apps Script) được điền vào biến ENDPOINT lúc phát hành.
 -->
 <style>
 :root{
@@ -119,7 +119,7 @@ textarea{min-height:92px;resize:vertical}
 </main>
 
 <script>
-var ENDPOINT = '__ENDPOINT__';
+var ENDPOINT = 'https://script.google.com/macros/s/AKfycbw3AoyGDUztOtxNm70YKPr6knF4yxpeA2XFi2Nv9m8GZWIUn-eXQpCoW0hPoaz0Pu1n_Q/exec';
 var MAX_SHOTS = 4, MAX_SIDE = 1400;
 var $ = function (id) { return document.getElementById(id); };
 var shots = [];
