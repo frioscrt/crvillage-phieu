@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Phiếu playtest · Ngôi Làng Ăn Thịt</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Cormorant+Garamond:wght@600&family=VT323&display=swap">
+<!--
+  Trang phiếu góp ý riêng cho tester CR Village (không nằm trong game).
+  Phát hành: node tools/phat-hanh/phieu.js cr-village  (đẩy lên kho ở games/cr-village/game.json, mục feedback).
+  Địa chỉ cổng nhận phiếu (Google Apps Script) được điền vào chỗ https://script.google.com/macros/s/AKfycbw3AoyGDUztOtxNm70YKPr6knF4yxpeA2XFi2Nv9m8GZWIUn-eXQpCoW0hPoaz0Pu1n_Q/exec lúc phát hành.
+-->
+<style>
+:root{
+  --bg:#07090d; --card:#101319; --card2:#151a23; --line:#3e5878; --ice:#9fc1e6; --ice2:#cfe0f3;
+  --fg:#e8eef6; --dim:#9fb0c6; --blood:#e0786f; --ok:#86b393;
+  --mono:'VT323',ui-monospace,Menlo,Consolas,monospace;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{margin:0;min-height:100dvh;background:radial-gradient(90% 60% at 50% 0%,#0d121b,#030406);color:var(--fg);font:15px/1.55 var(--sans);
+  padding:24px max(16px,env(safe-area-inset-right)) 56px max(16px,env(safe-area-inset-left))}
+.wrap{max-width:560px;margin:0 auto;display:grid;gap:18px}
+.kicker{font:400 18px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ice)}
+h1{font:600 clamp(30px,8vw,40px)/1.05 var(--serif);margin:4px 0 0}
+.lead{color:var(--dim);margin:6px 0 0}
+.card{background:var(--card);padding:18px 16px;display:grid;gap:14px;
+  box-shadow:0 -3px 0 0 var(--line),0 3px 0 0 var(--line),-3px 0 0 0 var(--line),3px 0 0 0 var(--line),0 10px 0 0 rgba(0,0,0,.5)}
+label{display:grid;gap:5px}
+.lb{font:400 19px/1.1 var(--mono);letter-spacing:.06em;color:var(--ice2)}
+.lb small{font-size:16px;color:var(--dim);letter-spacing:.02em}
+.hint{font-size:12.5px;color:var(--dim)}
+input,select,textarea{font:inherit;color:var(--fg);background:#0a0d12;border:0;border-radius:0;padding:10px 11px;width:100%;min-width:0;
+  box-shadow:0 0 0 2px #2a3546}
+input:focus,select:focus,textarea:focus{outline:none;box-shadow:0 0 0 2px var(--ice)}
+textarea{min-height:92px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:420px){.row{grid-template-columns:1fr}}
+.seg{display:flex;gap:8px}
+.seg label{flex:1;display:block;cursor:pointer}
+.seg input{position:absolute;opacity:0;width:1px;height:1px}
+.seg span{display:block;text-align:center;padding:9px 6px;background:#0a0d12;box-shadow:0 0 0 2px #2a3546;font:400 21px/1 var(--mono);letter-spacing:.06em}
+.seg input:checked+span{background:#1f2c40;box-shadow:0 0 0 2px var(--ice);color:#fff}
+.seg input:focus-visible+span{outline:2px solid var(--ice);outline-offset:3px}
+.shots{display:flex;flex-wrap:wrap;gap:8px}
+.shot{position:relative;width:84px;height:84px;background:#0a0d12;box-shadow:0 0 0 2px #2a3546}
+.shot img{width:100%;height:100%;object-fit:cover;display:block}
+.shot button{position:absolute;top:-8px;right:-8px;width:26px;height:26px;border:0;background:#2a1414;color:#ffd0c8;font:400 20px/1 var(--mono);cursor:pointer;box-shadow:0 0 0 2px var(--blood)}
+.addshot{display:inline-flex;align-items:center;justify-content:center;width:84px;height:84px;cursor:pointer;background:#0a0d12;box-shadow:0 0 0 2px #2a3546;color:var(--ice);font:400 18px/1.1 var(--mono);text-align:center;padding:6px}
+.addshot input{display:none}
+.btn{font:400 26px/1 var(--mono);letter-spacing:.06em;padding:13px 16px;border:0;border-radius:0;background:#1f2c40;color:#fff;cursor:pointer;text-align:left;
+  box-shadow:0 -2px 0 0 var(--ice),0 2px 0 0 var(--ice),-2px 0 0 0 var(--ice),2px 0 0 0 var(--ice),inset 6px 0 0 0 var(--ice),inset 8px 0 0 0 #07080a,0 6px 0 0 rgba(0,0,0,.5);padding-left:22px}
+.btn:active{transform:translateY(2px)}
+.btn:disabled{opacity:.5;cursor:wait}
+.btn.ghost{background:#151a23;box-shadow:0 -2px 0 0 var(--line),0 2px 0 0 var(--line),-2px 0 0 0 var(--line),2px 0 0 0 var(--line);padding-left:16px;font-size:22px}
+.msg{min-height:1.4em;font-size:14px;color:var(--dim)}
+.msg.err{color:var(--blood)} .msg.ok{color:var(--ok)}
+.done{display:grid;gap:14px;text-align:left}
+.done h2{font:400 30px/1 var(--mono);letter-spacing:.06em;color:var(--ok);margin:0}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.req{color:var(--blood)}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <div class="kicker">Project Artos 07 · Phiếu playtest</div>
+    <h1>Ngôi Làng Ăn Thịt</h1>
+    <p class="lead">Gặp lỗi, chỗ khó hiểu, quá dễ hay quá khó thì ghi một phiếu. Mã ván và bản game xem ở cuối Cài đặt trong game; số giờ đã chơi xem ở đồng hồ góc trên.</p>
+  </header>
+
+  <form class="card" id="f" novalidate>
+    <label><span class="lb">Tên tester <span class="req">*</span></span>
+      <input id="tester" autocomplete="nickname" maxlength="40" placeholder="VD: June"></label>
+    <div class="row">
+      <label><span class="lb">Mã ván</span>
+        <input id="code" autocomplete="off" autocapitalize="characters" maxlength="40" placeholder="VD: 18C-Z18AC3"></label>
+      <label><span class="lb">Số giờ chơi</span>
+        <input id="hour" autocomplete="off" inputmode="numeric" maxlength="10" placeholder="VD: 13:45"></label>
+    </div>
+    <div>
+      <div class="lb" style="margin-bottom:6px">Nhân vật</div>
+      <div class="seg" role="radiogroup" aria-label="Nhân vật">
+        <label><input type="radio" name="ch" value="Clevia" checked><span>Clevia</span></label>
+        <label><input type="radio" name="ch" value="Luke"><span>Luke</span></label>
+      </div>
+    </div>
+    <label><span class="lb">Vấn đề <span class="req">*</span></span>
+      <input id="issue" maxlength="200" placeholder="VD: Nút &quot;Người ở đây&quot; lúc hiện lúc không"></label>
+    <div>
+      <div class="lb" style="margin-bottom:6px">Ảnh chụp màn hình <small>(tối đa 4)</small></div>
+      <div class="shots" id="shots">
+        <label class="addshot" id="addshot">+ Thêm ảnh<input type="file" id="file" accept="image/*" multiple></label>
+      </div>
+    </div>
+    <label><span class="lb">Cụ thể hơn</span>
+      <textarea id="detail" maxlength="4000" placeholder="VD: Ban đầu vẫn hiện bình thường, chơi được một lúc thì bắt đầu lỗi."></textarea></label>
+    <label><span class="lb">Vị trí cụ thể</span>
+      <input id="where" maxlength="300" placeholder="Nơi nào, màn nào, vừa bấm gì. VD: Trạm xá, sau khi băng bó"></label>
+    <label><span class="lb">Phỏng đoán cá nhân</span>
+      <textarea id="guess" maxlength="2000" style="min-height:64px" placeholder="VD: Có thể là nút bị đè lên nhau."></textarea></label>
+    <label><span class="lb">Bản game <small>(không bắt buộc)</small></span>
+      <input id="ver" autocomplete="off" maxlength="30" placeholder="VD: 2026.11.06-11"></label>
+    <input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button class="btn" id="send" type="submit">Gửi phiếu</button>
+    <p class="msg" id="msg" role="status"></p>
+  </form>
+
+  <section class="card done" id="done" hidden>
+    <h2>Đã gửi phiếu</h2>
+    <p>Cảm ơn cậu. Clair sẽ đọc phiếu này.</p>
+    <button class="btn ghost" id="again" type="button">Ghi phiếu khác</button>
+  </section>
+</main>
+
+<script>
+var ENDPOINT = '__ENDPOINT__';
+var MAX_SHOTS = 4, MAX_SIDE = 1400;
+var $ = function (id) { return document.getElementById(id); };
+var shots = [];
+function msg(t, cls) { var m = $('msg'); m.textContent = t; m.className = 'msg' + (cls ? ' ' + cls : ''); }
+function store(k, v) { try { if (v == null) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+var nm = store('phieu_tester'); if (nm) $('tester').value = nm;
+var lastCh = store('phieu_ch'); if (lastCh) { var r = document.querySelector('input[name=ch][value="' + lastCh + '"]'); if (r) r.checked = true; }
+
+/* thu nhỏ ảnh trước khi gửi: cạnh dài tối đa 1400px, JPEG */
+function shrink(file) {
+  return new Promise(function (ok, no) {
+    var fr = new FileReader();
+    fr.onerror = no;
+    fr.onload = function () {
+      var im = new Image();
+      im.onerror = no;
+      im.onload = function () {
+        var k = Math.min(1, MAX_SIDE / Math.max(im.width, im.height)), w = Math.round(im.width * k), h = Math.round(im.height * k);
+        var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(im, 0, 0, w, h);
+        ok(cv.toDataURL('image/jpeg', 0.82));
+      };
+      im.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+function drawShots() {
+  var box = $('shots');
+  Array.prototype.slice.call(box.querySelectorAll('.shot')).forEach(function (x) { x.remove(); });
+  shots.forEach(function (d, i) {
+    var s = document.createElement('div'); s.className = 'shot';
+    s.innerHTML = '<img alt="Ảnh ' + (i + 1) + '"><button type="button" aria-label="Bỏ ảnh ' + (i + 1) + '">×</button>';
+    s.querySelector('img').src = d;
+    s.querySelector('button').onclick = function () { shots.splice(i, 1); drawShots(); };
+    box.insertBefore(s, $('addshot'));
+  });
+  $('addshot').hidden = shots.length >= MAX_SHOTS;
+}
+$('file').addEventListener('change', async function () {
+  var fs = Array.prototype.slice.call(this.files || []);
+  this.value = '';
+  for (var i = 0; i < fs.length && shots.length < MAX_SHOTS; i++) {
+    try { shots.push(await shrink(fs[i])); } catch (e) { msg('Không đọc được một ảnh, thử ảnh khác.', 'err'); }
+  }
+  drawShots();
+});
+
+$('f').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var tester = $('tester').value.trim(), issue = $('issue').value.trim();
+  if (!tester) { msg('Ghi tên tester trước đã.', 'err'); $('tester').focus(); return; }
+  if (!issue) { msg('Ghi ngắn vấn đề gặp phải.', 'err'); $('issue').focus(); return; }
+  if (!/^https:\/\/script\.google\.com\//.test(ENDPOINT)) { msg('Cổng nhận phiếu chưa mở. Báo Clair giúp nhé.', 'err'); return; }
+  if ($('website').value) return; /* ô bẫy máy spam */
+  var ch = document.querySelector('input[name=ch]:checked').value;
+  store('phieu_tester', tester); store('phieu_ch', ch);
+  var data = {
+    tester: tester, code: $('code').value.trim().toUpperCase(), character: ch, hour: $('hour').value.trim(),
+    issue: issue, detail: $('detail').value.trim(), where: $('where').value.trim(), guess: $('guess').value.trim(),
+    version: $('ver').value.trim(), shots: shots, sentAt: Date.now(), ua: navigator.userAgent.slice(0, 200)
+  };
+  $('send').disabled = true; msg(shots.length ? 'Đang gửi phiếu và ' + shots.length + ' ảnh…' : 'Đang gửi phiếu…');
+  try {
+    var res = await fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
+    var out = await res.json();
+    if (!out || !out.ok) throw new Error(out && out.error || 'fail');
+    ['code', 'hour', 'issue', 'detail', 'where', 'guess'].forEach(function (k) { $(k).value = ''; });
+    shots = []; drawShots(); msg('');
+    $('f').hidden = true; $('done').hidden = false; window.scrollTo(0, 0);
+  } catch (err) {
+    msg('Chưa gửi được. Kiểm tra mạng rồi bấm Gửi lại; phiếu vẫn còn nguyên.', 'err');
+  }
+  $('send').disabled = false;
+});
+$('again').onclick = function () { $('done').hidden = true; $('f').hidden = false; $('issue').focus(); };
+</script>
+</body>
+</html>
